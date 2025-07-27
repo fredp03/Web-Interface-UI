@@ -358,11 +358,17 @@
 
         // Mouse event handlers
         function handleFaderMouseDown(e) {
+            // Use click detail to detect double clicks since re-rendering
+            // replaces the fader element between clicks
+            if (e.detail === 2) {
+                handleFaderDoubleClick(e);
+                return;
+            }
+
             dragStartTime = Date.now();
             isDragging = true;
             hasDragged = false;
             initialMouseY = e.clientY;
-            handleFaderMouseMove(e);
         }
 
         function handleFaderDoubleClick(e) {
@@ -781,7 +787,6 @@
             const mainFader = document.getElementById('main-fader');
             if (mainFader) {
                 mainFader.addEventListener('mousedown', handleFaderMouseDown);
-                mainFader.addEventListener('dblclick', handleFaderDoubleClick);
             }
 
             // Add event listeners for effect faders
