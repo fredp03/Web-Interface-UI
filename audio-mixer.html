@@ -191,7 +191,7 @@
         }
 
         .fader-content {
-            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transition: transform 0.7s ease-in-out;
             transform: translateY(0);
         }
 
@@ -201,6 +201,12 @@
 
         .fader-content.slide-down {
             transform: translateY(100%);
+        }
+
+        /* Animate main fader segments when switching tracks */
+        #main-fader-top,
+        #main-fader-bottom {
+            transition: flex-grow 0.2s ease;
         }
     </style>
 </head>
@@ -286,7 +292,7 @@
             renderApp();
         }
 
-        function toggleEffectsView() {
+function toggleEffectsView() {
             if (isAnimating) return; // Prevent multiple animations
             
             isAnimating = true;
@@ -326,7 +332,30 @@
                         isAnimating = false;
                     }, 50);
                 }, 250); // Half of the transition duration
-            }
+}
+
+        function animateFaderTransition(fromValue, toValue) {
+            const topSeg = document.getElementById('main-fader-top');
+            const bottomSeg = document.getElementById('main-fader-bottom');
+            if (!topSeg || !bottomSeg) return;
+
+            const startPos = calculateFaderPosition(fromValue);
+            const endPos = calculateFaderPosition(toValue);
+
+            topSeg.style.transition = 'none';
+            bottomSeg.style.transition = 'none';
+            topSeg.style.flexGrow = startPos;
+            bottomSeg.style.flexGrow = 1 - startPos;
+
+            topSeg.getBoundingClientRect();
+
+            topSeg.style.transition = '';
+            bottomSeg.style.transition = '';
+            requestAnimationFrame(() => {
+                topSeg.style.flexGrow = endPos;
+                bottomSeg.style.flexGrow = 1 - endPos;
+            });
+        }
         }
 
         function toggleTrackMute(trackId) {
@@ -348,12 +377,17 @@
         }
 
         function selectTrack(trackId) {
+            const previous = getCurrentFaderValue();
             state.tracks = state.tracks.map(track =>
                 track.id === trackId
                     ? { ...track, isSelected: true }
                     : { ...track, isSelected: false }
             );
             renderApp();
+            const next = getCurrentFaderValue();
+            if (previous !== next) {
+                animateFaderTransition(previous, next);
+            }
         }
 
         // Mouse event handlers
@@ -430,6 +464,20 @@
                 );
                 renderApp();
             }
+        }
+
+        function handleFaderWheel(e) {
+            e.preventDefault();
+            const selectedTrack = getSelectedTrack();
+            if (!selectedTrack) return;
+            const delta = -e.deltaY / 100; // positive when scrolling up
+            const newVolume = Math.max(-60, Math.min(6, selectedTrack.volume + delta * 2));
+            state.tracks = state.tracks.map(track =>
+                track.id === selectedTrack.id
+                    ? { ...track, volume: Number(newVolume.toFixed(1)) }
+                    : track
+            );
+            renderApp();
         }
 
         function handleEffectMouseDown(effectType, e) {
@@ -536,7 +584,7 @@
                                                     <div class="flex flex-col items-center relative size-full">
                                                         <div class="box-border content-stretch flex flex-col items-center justify-start px-[3px] py-0 relative size-full">
                                                             <!-- Fader Top (inactive area above handle) -->
-                                                            <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${faderPosition}">
+                                                            <div id="main-fader-top" class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${faderPosition}">
                                                                 <div class="flex flex-row items-center justify-center relative size-full">
                                                                     <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-[30px] py-0 relative size-full">
                                                                         <div class="basis-0 bg-[#c7c7c7] grow h-full max-w-6 min-h-px min-w-3 relative ${faderPosition > 0.01 ? 'rounded-t-[3px]' : ''} shrink-0">
@@ -556,7 +604,7 @@
                                                             </div>
 
                                                             <!-- Fader Active (active area below handle) -->
-                                                            <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${1 - faderPosition}">
+                                                            <div id="main-fader-bottom" class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${1 - faderPosition}">
                                                                 <div class="flex flex-row items-center justify-center relative size-full">
                                                                     <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-[30px] py-0 relative size-full">
                                                                         <div class="basis-0 bg-[#d1624f] grow h-full max-w-6 min-h-px min-w-3 relative ${(1 - faderPosition) > 0.01 ? 'rounded-b-[3px]' : ''} shrink-0">
@@ -787,6 +835,7 @@
             const mainFader = document.getElementById('main-fader');
             if (mainFader) {
                 mainFader.addEventListener('mousedown', handleFaderMouseDown);
+                mainFader.addEventListener('wheel', handleFaderWheel, { passive: false });
             }
 
             // Add event listeners for effect faders
