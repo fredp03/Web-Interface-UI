@@ -211,7 +211,7 @@
 
         /* iOS Safari optimizations */
         .fader-container {
-            height: 700px;
+            min-height: max(50vh, 800px);
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
@@ -220,17 +220,17 @@
 
         /* Ensure fader area is always minimum height */
         .fader-wrapper {
-            height: 700px; /* Fixed height for fader area */
+            min-height: max(40vh, 650px); /* Accounts for header space within container */
         }
 
         /* Touch-friendly sizing for mobile */
         @media (max-width: 768px) {
             .fader-container {
-                height: 700px;
+                min-height: max(60vh, 900px);
             }
             
             .fader-wrapper {
-                height: 700px;
+                min-height: max(50vh, 750px);
             }
 
             /* Larger touch targets */
