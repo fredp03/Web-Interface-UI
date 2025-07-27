@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="rgb(224, 215, 206)">
+    <title>Audio Mixer Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anonymous+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Alegreya+Sans:ital,wght@0,400;0,500;1,400;1,500&family=Afacad:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Futura:wght@400;500;700&family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --font-size: 14px;
+            --background: #ffffff;
+            --foreground: oklch(0.145 0 0);
+            --card: #ffffff;
+            --card-foreground: oklch(0.145 0 0);
+            --popover: oklch(1 0 0);
+            --popover-foreground: oklch(0.145 0 0);
+            --primary: #030213;
+            --primary-foreground: oklch(1 0 0);
+            --secondary: oklch(0.95 0.0058 264.53);
+            --secondary-foreground: #030213;
+            --muted: #ececf0;
+            --muted-foreground: #717182;
+            --accent: #e9ebef;
+            --accent-foreground: #030213;
+            --destructive: #d4183d;
+            --destructive-foreground: #ffffff;
+            --border: rgba(0, 0, 0, 0.1);
+            --input: transparent;
+            --input-background: #f3f3f5;
+            --switch-background: #cbced4;
+            --font-weight-medium: 500;
+            --font-weight-normal: 400;
+            --ring: oklch(0.708 0 0);
+            --chart-1: oklch(0.646 0.222 41.116);
+            --chart-2: oklch(0.6 0.118 184.704);
+            --chart-3: oklch(0.398 0.07 227.392);
+            --chart-4: oklch(0.828 0.189 84.429);
+            --chart-5: oklch(0.769 0.188 70.08);
+            --radius: 0.625rem;
+            --sidebar: oklch(0.985 0 0);
+            --sidebar-foreground: oklch(0.145 0 0);
+            --sidebar-primary: #030213;
+            --sidebar-primary-foreground: oklch(0.985 0 0);
+            --sidebar-accent: oklch(0.97 0 0);
+            --sidebar-accent-foreground: oklch(0.205 0 0);
+            --sidebar-border: oklch(0.922 0 0);
+            --sidebar-ring: oklch(0.708 0 0);
+            --stroke-0: #818181;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-size: var(--font-size);
+            background-color: var(--background);
+            color: var(--foreground);
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Make sure size-full works correctly */
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        .size-full {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Custom utility classes */
+        .content-stretch {
+            align-content: stretch;
+        }
+        
+        .leading-normal {
+            line-height: normal;
+        }
+
+        .text-nowrap {
+            white-space: nowrap;
+        }
+
+        .whitespace-pre {
+            white-space: pre;
+        }
+
+        .not-italic {
+            font-style: normal;
+        }
+
+        .place-self-center {
+            place-self: center;
+        }
+
+        /* Font family classes */
+        .font-anonymous-pro-bold {
+            font-family: 'Anonymous Pro', monospace;
+            font-weight: 700;
+        }
+
+        .font-anonymous-pro-regular {
+            font-family: 'Anonymous Pro', monospace;
+            font-weight: 400;
+        }
+
+        .font-futura-condensed-extrabold {
+            font-family: 'Futura', sans-serif;
+            font-weight: 700;
+        }
+
+        .font-futura-condensed-medium {
+            font-family: 'Futura', sans-serif;
+            font-weight: 500;
+        }
+
+        .font-futura-medium {
+            font-family: 'Futura', sans-serif;
+            font-weight: 500;
+        }
+
+        .font-futura-bold {
+            font-family: 'Futura', sans-serif;
+            font-weight: 700;
+        }
+
+        .font-inter-regular {
+            font-family: 'Inter', sans-serif;
+            font-weight: 400;
+        }
+
+        .font-afacad-medium {
+            font-family: 'Afacad', sans-serif;
+            font-weight: 500;
+        }
+
+        .font-alegreya-sans-medium {
+            font-family: 'Alegreya Sans', sans-serif;
+            font-weight: 500;
+        }
+
+        /* Custom grid area classes */
+        .grid-area-1-1 { grid-area: 1 / 1; }
+        .grid-area-1-2 { grid-area: 1 / 2; }
+        .grid-area-1-3 { grid-area: 1 / 3; }
+
+        /* Custom aspect ratio */
+        .aspect-41-20 {
+            aspect-ratio: 41/20;
+        }
+
+        /* Prevent text selection on draggable elements */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* Custom border radius fixes for rounded container elements */
+        .pt-\[18px\] {
+            border-radius: 29px;
+        }
+
+        .shadow-\[-1px_1px_2px_0px_inset_rgba\(144\2c 138\2c 133\2c 0\.2\)\2c 1px_-1px_2px_0px_inset_rgba\(144\2c 138\2c 133\2c 0\.2\)\2c -1px_-1px_2px_0px_inset_rgba\(255\2c 255\2c 255\2c 0\.9\)\2c 1px_1px_3px_0px_inset_rgba\(144\2c 138\2c 133\2c 0\.9\)\] {
+            border-radius: 29px;
+        }
+
+        .py-\[27px\] {
+            padding-left: 15%;
+            padding-right: 15%;
+        }
+
+        /* Track hover effect */
+        .track-hover:hover:not(.track-selected) {
+            background-color: #e8dfd6 !important;
+            transition: background-color 0.2s ease;
+        }
+
+        .track-selected {
+            background-color: #efe5dd !important;
+        }
+
+        /* Scrolling animation for fader area */
+        .fader-container {
+            overflow: hidden; /* Ensure content doesn't show outside during animation */
+        }
+
+        .fader-content {
+            transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transform: translateY(0);
+        }
+
+        .fader-content.slide-up {
+            transform: translateY(-100%);
+        }
+
+        .fader-content.slide-down {
+            transform: translateY(100%);
+        }
+    </style>
+</head>
+<body>
+    <div id="app" class="size-full">
+        <div class="size-full">
+            <div id="audio-mixer" class="relative size-full no-select">
+                <!-- Content will be injected by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // SVG path constants
+        const svgPaths = {
+            p10f8c700: "M10.6012 3.44981C11.6693 4.96117 11.6693 7.04009 10.6012 8.55144M11.6993 1.85555C13.4336 4.31071 13.4336 7.69054 11.6993 10.1457M1 4.7252V7.27604C1 8.55144 1.60008 9.18915 2.80023 9.18915H3.65833C3.88036 9.18915 4.10239 9.2593 4.29441 9.38046L6.04663 10.5475C7.55882 11.555 8.80098 10.8217 8.80098 8.92769V3.07355C8.80098 1.17319 7.55882 0.446209 6.04663 1.45378L4.29441 2.62078C4.10239 2.74194 3.88036 2.81209 3.65833 2.81209H2.80023C1.60008 2.81209 1 3.44979 1 4.7252Z",
+            p1c850000: "M7.56996 3.43753C7.45317 3.35492 7.31841 3.29068 7.16569 3.24477C7.02193 3.1897 6.86921 3.14839 6.7075 3.12086C6.55477 3.09332 6.40203 3.07956 6.24931 3.07956C6.06963 3.07956 5.88096 3.1025 5.68331 3.14839C5.49465 3.18511 5.31945 3.24936 5.15775 3.34116C4.99604 3.42376 4.86576 3.53392 4.76693 3.67159C4.66811 3.80929 4.6187 3.9745 4.6187 4.16726C4.6187 4.39673 4.68608 4.5895 4.82084 4.74555C4.96459 4.90158 5.14876 5.04386 5.37336 5.17236C5.59797 5.29169 5.84502 5.40642 6.11455 5.51658C6.38406 5.61754 6.65359 5.73229 6.92311 5.86078C7.20162 5.98012 7.45317 6.12238 7.67778 6.28761C7.90237 6.45284 8.08205 6.65476 8.21682 6.89342C8.36056 7.12289 8.43243 7.40744 8.43243 7.74707C8.43243 8.07751 8.36505 8.36664 8.2303 8.61448C8.09552 8.86231 7.91585 9.06884 7.69125 9.23406C7.46664 9.39929 7.2151 9.5232 6.93658 9.60581C6.66707 9.68843 6.38856 9.72973 6.10108 9.72973C5.62492 9.72973 5.16224 9.62418 4.71303 9.41306C4.26383 9.20194 3.88202 8.91281 3.56757 8.54564L3.98533 8.09128C4.19196 8.29322 4.40309 8.46303 4.6187 8.60071C4.83431 8.7384 5.06342 8.84395 5.30598 8.91739C5.55754 8.98164 5.82256 9.01377 6.10108 9.01377C6.27177 9.01377 6.45144 8.99082 6.64012 8.94493C6.82878 8.89904 7.00396 8.82559 7.16569 8.72463C7.33638 8.61448 7.47113 8.48139 7.56996 8.32534C7.67778 8.16931 7.73168 7.98114 7.73168 7.76084C7.73168 7.51301 7.65981 7.30189 7.51605 7.12748C7.3813 6.94391 7.20162 6.78786 6.97701 6.65935C6.75242 6.52168 6.50085 6.39775 6.22236 6.28761C5.95283 6.17745 5.67882 6.06272 5.40031 5.94339C5.13079 5.82407 4.88372 5.68638 4.65913 5.53035C4.43453 5.3743 4.25035 5.19071 4.10661 4.97959C3.97185 4.75931 3.90448 4.4977 3.90448 4.19479C3.90448 3.90107 3.96736 3.64865 4.09313 3.43753C4.21891 3.21723 4.38512 3.03365 4.59175 2.88679C4.80736 2.73075 5.04545 2.61602 5.30598 2.54257C5.56652 2.46915 5.83155 2.43243 6.10108 2.43243C6.28075 2.43243 6.46492 2.4462 6.65359 2.47373C6.84225 2.49209 7.0399 2.53798 7.24654 2.61143C7.45317 2.67568 7.6643 2.77664 7.87991 2.91433L7.56996 3.43753Z",
+            p1d4b0300: "M22 28V19.3333L30 18V26.6667M22 28C22 29.1046 21.1046 30 20 30C18.8954 30 18 29.1046 18 28C18 26.8954 18.8954 26 20 26C21.1046 26 22 26.8954 22 28ZM30 26.6667C30 27.7712 29.1046 28.6667 28 28.6667C26.8954 28.6667 26 27.7712 26 26.6667C26 25.5621 26.8954 24.6667 28 24.6667C29.1046 24.6667 30 25.5621 30 26.6667Z",
+            p229de900: "M79.3889 10H91.6667M79.3889 15.5H91.6667M79.3889 21H91.6667M74.6667 10H74.6761M74.6667 15.5H74.6761M74.6667 21H74.6761",
+            p32fd0ee0: "M11.3514 6C11.3514 3.04453 8.95547 0.648649 6 0.648649C3.04453 0.648649 0.648649 3.04453 0.648649 6C0.648649 8.95547 3.04453 11.3514 6 11.3514C8.95547 11.3514 11.3514 8.95547 11.3514 6ZM12 6C12 9.31371 9.31371 12 6 12C2.68629 12 0 2.68629 0 6C0 2.68629 2.68629 0 6 0C9.31371 0 12 2.68629 12 6Z",
+            pcd3f280: "M18 28V24C18 22.4087 18.6321 20.8826 19.7574 19.7574C20.8826 18.6321 22.4087 18 24 18C25.5913 18 27.1174 18.6321 28.2426 19.7574C29.3679 20.8826 30 22.4087 30 24V28M30 28.6667C30 29.0203 29.8595 29.3594 29.6095 29.6095C29.3594 29.8595 29.0203 30 28.6667 30H28C27.6464 30 27.3072 29.8595 27.0572 29.6095C26.8071 29.3594 26.6667 29.0203 26.6667 28.6667V26.6667C26.6667 26.313 26.8071 25.9739 27.0572 25.7239C27.3072 25.4738 27.6464 25.3333 28 25.3333H30V28.6667ZM18 28.6667C18 29.0203 18.1405 29.3594 18.3905 29.6095C18.6406 29.8595 18.9797 30 19.3333 30H20C20.3536 30 20.6928 29.8595 20.9428 29.6095C21.1929 29.3594 21.3333 29.0203 21.3333 28.6667V26.6667C21.3333 26.313 21.1929 25.9739 20.9428 25.7239C20.6928 25.4738 20.3536 25.3333 20 25.3333H18V28.6667Z",
+            p2db9cec0: "M94.3889 10H106.667M94.3889 15.5H106.667M94.3889 21H106.667M89.6667 10H89.6761M89.6667 15.5H89.6761M89.6667 21H89.6761"
+        };
+
+        // Application state
+        let state = {
+            faderValue: 0, // This will be deprecated in favor of individual track volumes
+            isConnected: true,
+            activeButton: 'monitor',
+            isEffectsView: false,
+            effectsValues: {
+                reverbDryWet: 15,
+                reverbDecay: 2.4,
+                delayDryWet: 10,
+            },
+            tracks: [
+                { id: 1, name: "Guitar 1", isMuted: false, isSolo: false, isActive: false, isSelected: false, volume: -10 },
+                { id: 2, name: "Guitar 2", isMuted: false, isSolo: false, isActive: true, isSelected: true, volume: 0 },
+                { id: 3, name: "Guitar 3", isMuted: false, isSolo: false, isActive: false, isSelected: false, volume: -5 }
+            ]
+        };
+
+        let isDragging = false;
+        let isDraggingEffect = null;
+        let dragStartTime = 0;
+        let isAnimating = false;
+        let hasDragged = false;
+        let initialMouseY = 0;
+
+        // Helper functions
+        function getSelectedTrack() {
+            return state.tracks.find(track => track.isSelected);
+        }
+
+        function getCurrentFaderValue() {
+            const selectedTrack = getSelectedTrack();
+            return selectedTrack ? selectedTrack.volume : 0;
+        }
+
+        function calculateFaderPosition(value) {
+            // Visual scale has 5 points evenly distributed: +6, 0, -20, -40, -60
+            // These correspond to positions: 0%, 25%, 50%, 75%, 100%
+            // So 0 dB should be at 25% from top (0.25)
+            if (value >= 6) return 0;
+            if (value >= 0) return (6 - value) / 6 * 0.25; // +6 to 0: 0% to 25%
+            if (value >= -20) return 0.25 + (0 - value) / 20 * 0.25; // 0 to -20: 25% to 50%
+            if (value >= -40) return 0.5 + (-20 - value) / 20 * 0.25; // -20 to -40: 50% to 75%
+            if (value >= -60) return 0.75 + (-40 - value) / 20 * 0.25; // -40 to -60: 75% to 100%
+            return 1; // Below -60
+        }
+
+        function calculateEffectPosition(value) {
+            return (100 - value) / 100;
+        }
+
+        function toggleConnection() {
+            state.isConnected = !state.isConnected;
+            renderApp();
+        }
+
+        function setActiveButton(button) {
+            state.activeButton = button;
+            renderApp();
+        }
+
+        function toggleEffectsView() {
+            if (isAnimating) return; // Prevent multiple animations
+            
+            isAnimating = true;
+            const contentDiv = document.querySelector('.fader-content');
+            
+            if (!state.isEffectsView) {
+                // Going to effects view - slide up
+                contentDiv.classList.add('slide-up');
+                
+                setTimeout(() => {
+                    state.isEffectsView = true;
+                    renderApp();
+                    
+                    // Start from below and slide to normal position
+                    const newContentDiv = document.querySelector('.fader-content');
+                    newContentDiv.classList.add('slide-down');
+                    
+                    setTimeout(() => {
+                        newContentDiv.classList.remove('slide-down');
+                        isAnimating = false;
+                    }, 50);
+                }, 250); // Half of the transition duration
+            } else {
+                // Going back to main view - slide down
+                contentDiv.classList.add('slide-down');
+                
+                setTimeout(() => {
+                    state.isEffectsView = false;
+                    renderApp();
+                    
+                    // Start from above and slide to normal position
+                    const newContentDiv = document.querySelector('.fader-content');
+                    newContentDiv.classList.add('slide-up');
+                    
+                    setTimeout(() => {
+                        newContentDiv.classList.remove('slide-up');
+                        isAnimating = false;
+                    }, 50);
+                }, 250); // Half of the transition duration
+            }
+        }
+
+        function toggleTrackMute(trackId) {
+            state.tracks = state.tracks.map(track =>
+                track.id === trackId
+                    ? { ...track, isMuted: !track.isMuted }
+                    : track
+            );
+            renderApp();
+        }
+
+        function toggleTrackSolo(trackId) {
+            state.tracks = state.tracks.map(track =>
+                track.id === trackId
+                    ? { ...track, isSolo: !track.isSolo }
+                    : track
+            );
+            renderApp();
+        }
+
+        function selectTrack(trackId) {
+            state.tracks = state.tracks.map(track =>
+                track.id === trackId
+                    ? { ...track, isSelected: true }
+                    : { ...track, isSelected: false }
+            );
+            renderApp();
+        }
+
+        // Mouse event handlers
+        function handleFaderMouseDown(e) {
+            dragStartTime = Date.now();
+            isDragging = true;
+            hasDragged = false;
+            initialMouseY = e.clientY;
+            handleFaderMouseMove(e);
+        }
+
+        function handleFaderDoubleClick(e) {
+            // Only reset if we haven't dragged (to avoid accidental resets during dragging)
+            if (!hasDragged) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const selectedTrack = getSelectedTrack();
+                if (selectedTrack) {
+                    state.tracks = state.tracks.map(track =>
+                        track.id === selectedTrack.id
+                            ? { ...track, volume: 0 }
+                            : track
+                    );
+                    renderApp();
+                }
+            }
+        }
+
+        function handleFaderMouseMove(e) {
+            if (!isDragging) return;
+            
+            // Check if mouse has actually moved significantly before marking as dragged
+            const mouseMoveDistance = Math.abs(e.clientY - initialMouseY);
+            if (mouseMoveDistance > 3) { // 3px threshold to distinguish from click
+                hasDragged = true;
+            }
+            
+            const fader = document.getElementById('main-fader');
+            if (!fader) return;
+
+            const rect = fader.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const percentage = Math.max(0, Math.min(1, y / rect.height));
+            
+            // Convert percentage back to dB value using the same scale segments
+            let dbValue;
+            if (percentage <= 0.25) {
+                // 0% to 25%: +6 to 0 dB
+                dbValue = 6 - (percentage / 0.25) * 6;
+            } else if (percentage <= 0.5) {
+                // 25% to 50%: 0 to -20 dB
+                dbValue = 0 - ((percentage - 0.25) / 0.25) * 20;
+            } else if (percentage <= 0.75) {
+                // 50% to 75%: -20 to -40 dB
+                dbValue = -20 - ((percentage - 0.5) / 0.25) * 20;
+            } else {
+                // 75% to 100%: -40 to -60 dB
+                dbValue = -40 - ((percentage - 0.75) / 0.25) * 20;
+            }
+            
+            const selectedTrack = getSelectedTrack();
+            if (selectedTrack) {
+                state.tracks = state.tracks.map(track =>
+                    track.id === selectedTrack.id
+                        ? { ...track, volume: Number(dbValue.toFixed(1)) }
+                        : track
+                );
+                renderApp();
+            }
+        }
+
+        function handleEffectMouseDown(effectType, e) {
+            isDraggingEffect = effectType;
+            handleEffectMouseMove(e);
+        }
+
+        function handleEffectMouseMove(e) {
+            if (!isDraggingEffect) return;
+
+            const effectElement = document.getElementById(`effect-${isDraggingEffect}`);
+            if (!effectElement) return;
+
+            const rect = effectElement.getBoundingClientRect();
+            const y = e.clientY - rect.top;
+            const percentage = Math.max(0, Math.min(1, y / rect.height));
+            
+            const effectValue = 100 - (percentage * 100);
+            state.effectsValues[isDraggingEffect] = Number(effectValue.toFixed(1));
+            renderApp();
+        }
+
+        function handleMouseUp() {
+            isDragging = false;
+            isDraggingEffect = null;
+            // Reset drag flag immediately for double-click detection
+            hasDragged = false;
+        }
+
+        // Render functions
+        function renderConnectionStatus() {
+            return `
+                <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-start p-0 relative shrink-0 cursor-pointer" onclick="toggleConnection()">
+                    <div class="relative shrink-0 size-[13px]">
+                        <svg class="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 13 13">
+                            <circle cx="6.5" cy="6.5" fill="${state.isConnected ? '#91DC87' : '#DC8791'}" r="6.5" />
+                        </svg>
+                    </div>
+                    <div class="font-anonymous-pro-regular leading-[0] not-italic relative shrink-0 text-[#292d32] text-[11px] text-left text-nowrap">
+                        <p class="block leading-normal whitespace-pre">${state.isConnected ? 'Connected' : 'Disconnected'}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFaderArea() {
+            const currentFaderValue = getCurrentFaderValue();
+            const faderPosition = calculateFaderPosition(currentFaderValue);
+            
+            if (!state.isEffectsView) {
+                return `
+                    <div class="basis-0 bg-[#d4cbc4] grow min-h-px min-w-px relative rounded-[29px] shadow-[1px_1px_2px_0px_rgba(255,255,255,0.3),-1px_-1px_2px_0px_rgba(144,138,133,0.5)] shrink-0 w-full fader-container">
+                        <div class="flex flex-col items-center relative size-full rounded-[29px] fader-content">
+                            <div class="box-border content-stretch flex flex-col items-center justify-start pb-8 pt-[18px] px-[19px] relative size-full">
+                                <!-- dB Reading -->
+                                <div class="basis-0 box-border gap-2.5 grid grid-cols-[repeat(3,_minmax(0px,_1fr))] grid-rows-[repeat(1,_minmax(0px,_1fr))] grow max-h-[63px] min-h-px min-w-px overflow-clip p-0 relative shrink-0 w-full">
+                                    <div class="grid-area-1-2 box-border content-stretch flex flex-col gap-2.5 items-center justify-end p-0 relative self-center shrink-0">
+                                        <div class="box-border content-stretch flex flex-col gap-[3px] items-end justify-center leading-[0] not-italic p-0 relative shrink-0 text-left text-nowrap">
+                                            <div class="font-futura-condensed-extrabold relative shrink-0 text-[#383838] text-[16px]">
+                                                <p class="block leading-normal text-nowrap whitespace-pre">${currentFaderValue}</p>
+                                            </div>
+                                            <div class="font-inter-regular font-normal relative shrink-0 text-[#818181] text-[12px]">
+                                                <p class="block leading-normal text-nowrap whitespace-pre">dB</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="grid-area-1-3 relative shrink-0 cursor-pointer" onclick="toggleEffectsView()">
+                                        <svg class="block w-[102px] h-[63px]" fill="none" preserveAspectRatio="none" viewBox="0 0 102 63">
+                                            <path d="${svgPaths.p229de900}" stroke="var(--stroke-0)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Fader Wrapper -->
+                                <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full">
+                                    <div class="relative size-full">
+                                        <div class="box-border gap-[29px] grid grid-cols-[repeat(3,_minmax(0px,_1fr))] grid-rows-[repeat(1,_minmax(0px,_1fr))] px-3.5 py-[9px] relative size-full">
+                                            <!-- Fader DB Range -->
+                                            <div class="grid-area-1-1 opacity-[0.68] relative shrink-0">
+                                                <div class="flex flex-col items-end relative size-full">
+                                                    <div class="box-border content-stretch flex flex-col font-futura-medium items-end justify-between leading-[0] not-italic p-[12px] relative size-full text-[#818181] text-[13px] text-left text-nowrap">
+                                                        <div class="relative shrink-0">
+                                                            <p class="block leading-normal text-nowrap whitespace-pre">+6</p>
+                                                        </div>
+                                                        <div class="relative shrink-0">
+                                                            <p class="block leading-normal text-nowrap whitespace-pre">0</p>
+                                                        </div>
+                                                        <div class="relative shrink-0">
+                                                            <p class="block leading-normal text-nowrap whitespace-pre">-20</p>
+                                                        </div>
+                                                        <div class="relative shrink-0">
+                                                            <p class="block leading-normal text-nowrap whitespace-pre">-40</p>
+                                                        </div>
+                                                        <div class="relative shrink-0">
+                                                            <p class="block leading-normal text-nowrap whitespace-pre">-60</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Interactive Fader -->
+                                            <div id="main-fader" class="grid-area-1-2 box-border content-stretch flex flex-row gap-2.5 items-center justify-start overflow-clip px-0 py-[13px] relative rounded-[5px] shrink-0 cursor-pointer">
+                                                <div class="basis-0 grow h-full min-h-px min-w-px relative shrink-0">
+                                                    <div class="flex flex-col items-center relative size-full">
+                                                        <div class="box-border content-stretch flex flex-col items-center justify-start px-[3px] py-0 relative size-full">
+                                                            <!-- Fader Top (inactive area above handle) -->
+                                                            <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${faderPosition}">
+                                                                <div class="flex flex-row items-center justify-center relative size-full">
+                                                                    <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-[30px] py-0 relative size-full">
+                                                                        <div class="basis-0 bg-[#c7c7c7] grow h-full max-w-6 min-h-px min-w-3 relative ${faderPosition > 0.01 ? 'rounded-t-[3px]' : ''} shrink-0">
+                                                                            <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(147,147,147,0.2),1px_-1px_2px_0px_inset_rgba(147,147,147,0.2),-1px_-1px_2px_0px_inset_rgba(251,251,251,0.9),1px_1px_3px_0px_inset_rgba(147,147,147,0.9)]"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <!-- Fader Handle -->
+                                                            <div class="relative shrink-0 w-full">
+                                                                <div class="flex flex-col items-center justify-center relative size-full">
+                                                                    <div class="box-border content-stretch flex flex-col gap-2.5 items-center justify-center px-0.5 py-0 relative w-full">
+                                                                        <div class="aspect-41-20 bg-[#dedede] max-h-5 max-w-[41px] min-h-[13px] min-w-[26.65px] rounded shadow-[0px_1px_2px_0px_rgba(60,64,67,0.3),0px_2px_6px_2px_rgba(60,64,67,0.15)] shrink-0 w-full"></div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Fader Active (active area below handle) -->
+                                                            <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${1 - faderPosition}">
+                                                                <div class="flex flex-row items-center justify-center relative size-full">
+                                                                    <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-[30px] py-0 relative size-full">
+                                                                        <div class="basis-0 bg-[#d1624f] grow h-full max-w-6 min-h-px min-w-3 relative ${(1 - faderPosition) > 0.01 ? 'rounded-b-[3px]' : ''} shrink-0">
+                                                                            <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(161,99,60,0.2),1px_-1px_2px_0px_inset_rgba(161,99,60,0.2),-1px_-1px_2px_0px_inset_rgba(255,181,108,0.9),1px_1px_3px_0px_inset_rgba(161,99,60,0.9)]"></div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(144,138,133,0.2),1px_-1px_2px_0px_inset_rgba(144,138,133,0.2),-1px_-1px_2px_0px_inset_rgba(255,255,255,0.9),1px_1px_3px_0px_inset_rgba(144,138,133,0.9)]"></div>
+                    </div>
+                `;
+            } else {
+                // Effects view
+                const reverbDryWetPosition = calculateEffectPosition(state.effectsValues.reverbDryWet);
+                const reverbDecayPosition = calculateEffectPosition(state.effectsValues.reverbDecay);
+                const delayDryWetPosition = calculateEffectPosition(state.effectsValues.delayDryWet);
+
+                return `
+                    <div class="basis-0 bg-[#d4cbc4] grow min-h-px min-w-px relative rounded-[29px] shadow-[1px_1px_2px_0px_rgba(255,255,255,0.3),-1px_-1px_2px_0px_rgba(144,138,133,0.5)] shrink-0 w-full fader-container">
+                        <div class="flex flex-col items-center relative size-full rounded-[29px] fader-content">
+                            <div class="box-border content-stretch flex flex-col items-center justify-start pb-8 pt-[18px] px-[19px] relative size-full">
+                                <!-- Effects Header -->
+                                <div class="box-border gap-2.5 grid grid-cols-[repeat(3,_minmax(0px,_1fr))] grid-rows-[repeat(1,_minmax(0px,_1fr))] h-[51px] max-h-[63px] overflow-clip p-0 relative shrink-0 w-full">
+                                    <div class="grid-area-1-3 relative shrink-0 cursor-pointer" onclick="toggleEffectsView()">
+                                        <svg class="block w-[117px] h-[51px]" fill="none" preserveAspectRatio="none" viewBox="0 0 117 51">
+                                            <path d="${svgPaths.p2db9cec0}" stroke="var(--stroke-0)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Effects Fader Wrapper -->
+                                <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full">
+                                    <div class="flex flex-row items-center justify-center relative size-full">
+                                        <div class="box-border content-stretch flex flex-row gap-16 items-center justify-center px-7 py-0 relative size-full">
+                                            ${renderEffectFader('reverbDryWet', 'Reverb', 'Dry / Wet', state.effectsValues.reverbDryWet, reverbDryWetPosition)}
+                                            ${renderEffectFader('reverbDecay', 'Reverb', 'Decay', state.effectsValues.reverbDecay, reverbDecayPosition)}
+                                            ${renderEffectFader('delayDryWet', 'Delay', 'Dry / Wet', state.effectsValues.delayDryWet, delayDryWetPosition)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(144,138,133,0.2),1px_-1px_2px_0px_inset_rgba(144,138,133,0.2),-1px_-1px_2px_0px_inset_rgba(255,255,255,0.9),1px_1px_3px_0px_inset_rgba(144,138,133,0.9)]"></div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEffectFader(effectKey, title, subtitle, value, position) {
+            return `
+                <div class="box-border content-stretch flex flex-col gap-[18px] h-full items-center justify-start p-0 relative shrink-0 w-9">
+                    <div class="box-border content-stretch flex flex-col gap-[3px] items-end justify-center leading-[0] not-italic p-0 relative shrink-0 text-[#818181] text-left text-nowrap">
+                        <div class="font-futura-condensed-extrabold relative shrink-0 text-[16px]">
+                            <p class="block leading-normal text-nowrap whitespace-pre">${value}</p>
+                        </div>
+                        <div class="font-inter-regular font-normal relative shrink-0 text-[12px]">
+                            <p class="block leading-normal text-nowrap whitespace-pre">%</p>
+                        </div>
+                    </div>
+                    <div id="effect-${effectKey}" class="basis-0 box-border content-stretch flex flex-row gap-2.5 grow items-center justify-start min-h-px min-w-px overflow-clip px-0 py-[13px] relative rounded-[5px] shrink-0 w-full cursor-pointer">
+                        <div class="basis-0 grow h-full min-h-px min-w-px relative shrink-0">
+                            <div class="flex flex-col items-center relative size-full">
+                                <div class="box-border content-stretch flex flex-col items-center justify-start px-[3px] py-0 relative size-full">
+                                    <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${position}">
+                                        <div class="flex flex-row items-center justify-center relative size-full">
+                                            <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-[18px] py-0 relative size-full">
+                                                <div class="basis-0 bg-[#c7c7c7] grow h-full max-w-6 min-h-px min-w-3 relative ${position > 0.01 ? 'rounded-t-[3px]' : ''} shrink-0">
+                                                    <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(147,147,147,0.2),1px_-1px_2px_0px_inset_rgba(147,147,147,0.2),-1px_-1px_2px_0px_inset_rgba(251,251,251,0.9),1px_1px_3px_0px_inset_rgba(147,147,147,0.9)]"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="relative shrink-0 w-full">
+                                        <div class="flex flex-col items-center justify-center relative size-full">
+                                            <div class="box-border content-stretch flex flex-col gap-2.5 items-center justify-center px-[9px] py-0 relative w-full">
+                                                <div class="aspect-41-20 bg-[#dedede] max-h-5 max-w-[41px] min-h-[13px] min-w-[26.65px] rounded shadow-[0px_1px_2px_0px_rgba(60,64,67,0.3),0px_2px_6px_2px_rgba(60,64,67,0.15)] shrink-0 w-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="basis-0 grow min-h-px min-w-px relative shrink-0 w-full" style="flex-grow: ${1 - position}">
+                                        <div class="flex flex-row items-center justify-center relative size-full">
+                                            <div class="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-[18px] py-0 relative size-full">
+                                                <div class="basis-0 bg-[#e38c54] grow h-full max-w-6 min-h-px min-w-3 relative ${(1 - position) > 0.01 ? 'rounded-b-[3px]' : ''} shrink-0">
+                                                    <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(161,99,60,0.2),1px_-1px_2px_0px_inset_rgba(161,99,60,0.2),-1px_-1px_2px_0px_inset_rgba(255,181,108,0.9),1px_1px_3px_0px_inset_rgba(161,99,60,0.9)]"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 pointer-events-none shadow-[-1px_1px_2px_0px_inset_rgba(158,158,158,0.2),1px_-1px_2px_0px_inset_rgba(158,158,158,0.2),-1px_-1px_2px_0px_inset_rgba(255,255,255,0.9),1px_1px_3px_0px_inset_rgba(158,158,158,0.9)]"></div>
+                    </div>
+                    <div class="box-border content-stretch flex flex-col gap-1 items-center justify-start leading-[0] p-0 relative shrink-0 text-[#000000] w-full">
+                        <div class="font-afacad-medium font-medium relative shrink-0 text-[13px] text-left text-nowrap">
+                            <p class="block leading-normal whitespace-pre">${title}</p>
+                        </div>
+                        <div class="font-futura-condensed-medium min-w-full not-italic relative shrink-0 text-[10px] text-center" style="width: min-content">
+                            <p class="block leading-normal">${subtitle}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTracks() {
+            return state.tracks.map((track, index) => `
+                <div class="relative w-full h-[34px] ${index === 0 ? 'max-h-[34px]' : ''} shrink-0 cursor-pointer" onclick="selectTrack(${track.id})">
+                    <div class="track-hover ${track.isSelected ? 'track-selected bg-[#efe5dd]' : 'bg-[#d4cbc4] opacity-80'} absolute inset-0 rounded-md border-[0.5px] border-solid border-[#dcc7b6] shadow-[0px_1px_3.5px_0px_rgba(0,0,0,0.25)]">
+                        <div class="flex flex-row items-center max-h-inherit relative size-full">
+                            <div class="box-border content-stretch flex flex-row h-[34px] items-center justify-between max-h-inherit px-[29px] py-[5px] relative w-full">
+                                <div class="font-futura-bold leading-[0] not-italic relative shrink-0 text-[#53453b] text-[11px] text-left text-nowrap">
+                                    <p class="block leading-normal whitespace-pre">${track.name}</p>
+                                </div>
+                                <div class="h-2.5 relative shrink-0 w-3 cursor-pointer" onclick="event.stopPropagation(); toggleTrackMute(${track.id})">
+                                    <div class="absolute bottom-[-5.007%] left-[-4.167%] right-[-4.167%] top-[-5.007%]">
+                                        <svg class="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 14 12">
+                                            <path d="${svgPaths.p10f8c700}" stroke="${track.isMuted ? '#DC8791' : '#292D32'}" stroke-linecap="round" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="relative shrink-0 size-3 cursor-pointer" onclick="event.stopPropagation(); toggleTrackSolo(${track.id})">
+                                    <svg class="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 12 12">
+                                        <path d="${svgPaths.p1c850000}" fill="${track.isSolo ? '#91DC87' : '#292D32'}" />
+                                        <path d="${svgPaths.p32fd0ee0}" fill="${track.isSolo ? '#91DC87' : '#292D32'}" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="absolute inset-0 pointer-events-none shadow-[0px_0px_1.3px_0px_inset_rgba(0,0,0,0.25)]"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderButtons() {
+            const buttons = [
+                { key: 'effects', label: 'Effects', path: svgPaths.p1d4b0300 },
+                { key: 'monitor', label: 'Monitor', path: svgPaths.pcd3f280 },
+                { key: 'backing', label: 'Backing', path: svgPaths.p1d4b0300 }
+            ];
+
+            return buttons.map((button, index) => `
+                <div class="grid-area-1-${index + 1} box-border content-stretch flex flex-col h-[71px] items-center justify-between p-0 place-self-center relative shrink-0 w-[63.667px] cursor-pointer ${state.activeButton === button.key ? 'opacity-100' : 'opacity-70'}" onclick="setActiveButton('${button.key}')">
+                    <div class="relative shrink-0 size-[42px]">
+                        <div class="absolute bottom-[-9.524%] left-[-7.143%] right-[-9.524%] top-[-7.143%]">
+                            <svg class="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 49 49">
+                                <g filter="url(#filter0_dddd_1_487)">
+                                    <rect fill="#D8CFC8" height="42" rx="9" width="42" x="3" y="3" />
+                                    <rect height="41" rx="8.5" stroke="#DCC7B6" width="41" x="3.5" y="3.5" />
+                                    <path d="${button.path}" stroke="${button.key === 'monitor' ? '#53453B' : '#1E1E1E'}" stroke-linecap="round" stroke-linejoin="round" />
+                                </g>
+                                <defs>
+                                    <filter color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse" height="49" id="filter0_dddd_1_487" width="49" x="0" y="0">
+                                        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                        <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+                                        <feOffset dx="1" dy="1" />
+                                        <feGaussianBlur stdDeviation="1.5" />
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0.709804 0 0 0 0 0.682353 0 0 0 0 0.658824 0 0 0 0.9 0" />
+                                        <feBlend in2="BackgroundImageFix" mode="normal" result="effect1_dropShadow_1_487" />
+                                        <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+                                        <feOffset dx="-1" dy="-1" />
+                                        <feGaussianBlur stdDeviation="1" />
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0.984314 0 0 0 0 0.941176 0 0 0 0 0.909804 0 0 0 0.9 0" />
+                                        <feBlend in2="effect1_dropShadow_1_487" mode="normal" result="effect2_dropShadow_1_487" />
+                                        <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+                                        <feOffset dx="1" dy="-1" />
+                                        <feGaussianBlur stdDeviation="1" />
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0.709804 0 0 0 0 0.682353 0 0 0 0 0.658824 0 0 0 0.2 0" />
+                                        <feBlend in2="effect2_dropShadow_1_487" mode="normal" result="effect3_dropShadow_1_487" />
+                                        <feColorMatrix in="SourceAlpha" result="hardAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" />
+                                        <feOffset dx="-1" dy="1" />
+                                        <feGaussianBlur stdDeviation="1" />
+                                        <feColorMatrix type="matrix" values="0 0 0 0 0.709804 0 0 0 0 0.682353 0 0 0 0 0.658824 0 0 0 0.2 0" />
+                                        <feBlend in2="effect3_dropShadow_1_487" mode="normal" result="effect4_dropShadow_1_487" />
+                                        <feBlend in="SourceGraphic" in2="effect4_dropShadow_1_487" mode="normal" result="shape" />
+                                    </filter>
+                                </defs>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="font-alegreya-sans-medium leading-[0] not-italic relative shrink-0 text-[#53453b] text-[11px] text-left text-nowrap">
+                        <p class="block leading-normal whitespace-pre">${button.label}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderApp() {
+            const audioMixerEl = document.getElementById('audio-mixer');
+            if (!audioMixerEl) return;
+
+            audioMixerEl.innerHTML = `
+                <div class="absolute bg-[#e0d7ce] box-border content-stretch flex flex-col gap-[26px] h-full items-center justify-start left-0 overflow-clip px-[29px] py-[30px] top-0 w-full">
+                    <!-- Header -->
+                    <div class="box-border content-stretch flex flex-row items-center justify-between px-0 py-2 relative shrink-0 w-full">
+                        <div class="font-anonymous-pro-bold leading-[0] not-italic relative shrink-0 text-[#000000] text-[24px] text-left text-nowrap">
+                            <p class="block leading-normal whitespace-pre">User</p>
+                        </div>
+                        ${renderConnectionStatus()}
+                    </div>
+
+                    <!-- Fader Area -->
+                    ${renderFaderArea()}
+
+                    <!-- Available Track Group -->
+                    <div class="basis-0 box-border content-stretch flex flex-col grow items-center justify-between max-h-[248px] min-h-px min-w-px px-0 py-[27px] relative shrink-0 w-full">
+                        ${renderTracks()}
+                    </div>
+
+                    <!-- Monitor Buttons -->
+                    <div class="box-border gap-[15px] grid grid-cols-[repeat(3,_minmax(0px,_1fr))] grid-rows-[112px] h-28 p-0 relative shrink-0 w-full">
+                        ${renderButtons()}
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners for faders
+            const mainFader = document.getElementById('main-fader');
+            if (mainFader) {
+                mainFader.addEventListener('mousedown', handleFaderMouseDown);
+                mainFader.addEventListener('dblclick', handleFaderDoubleClick);
+            }
+
+            // Add event listeners for effect faders
+            Object.keys(state.effectsValues).forEach(effectKey => {
+                const effectElement = document.getElementById(`effect-${effectKey}`);
+                if (effectElement) {
+                    effectElement.addEventListener('mousedown', (e) => handleEffectMouseDown(effectKey, e));
+                }
+            });
+        }
+
+        // Global mouse events
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                handleFaderMouseMove(e);
+            }
+            if (isDraggingEffect) {
+                handleEffectMouseMove(e);
+            }
+        });
+
+        document.addEventListener('mouseup', handleMouseUp);
+        document.addEventListener('mouseleave', handleMouseUp);
+
+        // Make functions available globally for onclick handlers
+        window.toggleConnection = toggleConnection;
+        window.setActiveButton = setActiveButton;
+        window.toggleEffectsView = toggleEffectsView;
+        window.toggleTrackMute = toggleTrackMute;
+        window.toggleTrackSolo = toggleTrackSolo;
+        window.selectTrack = selectTrack;
+
+        // Initialize the app
+        renderApp();
+    </script>
+</body>
+</html>
