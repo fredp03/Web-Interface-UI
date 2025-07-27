@@ -470,7 +470,7 @@ function toggleEffectsView() {
             e.preventDefault();
             const selectedTrack = getSelectedTrack();
             if (!selectedTrack) return;
-            const delta = -e.deltaY / 100; // positive when scrolling up
+            const delta = e.deltaY / 100; // positive when scrolling down
             const newVolume = Math.max(-60, Math.min(6, selectedTrack.volume + delta * 2));
             state.tracks = state.tracks.map(track =>
                 track.id === selectedTrack.id
