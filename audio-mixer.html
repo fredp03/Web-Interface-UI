@@ -253,6 +253,7 @@
         let isDraggingEffect = null;
         let dragStartTime = 0;
         let isAnimating = false;
+        const FADER_ANIMATION_DURATION = 700; // ms, must match CSS
         let hasDragged = false;
         let initialMouseY = 0;
 
@@ -294,44 +295,50 @@
 
 function toggleEffectsView() {
             if (isAnimating) return; // Prevent multiple animations
-            
+
             isAnimating = true;
             const contentDiv = document.querySelector('.fader-content');
-            
+
             if (!state.isEffectsView) {
-                // Going to effects view - slide up
+                // Going to effects view - slide current content up
                 contentDiv.classList.add('slide-up');
-                
+
                 setTimeout(() => {
                     state.isEffectsView = true;
                     renderApp();
-                    
-                    // Start from below and slide to normal position
+
+                    // Start next view from below then slide to normal position
                     const newContentDiv = document.querySelector('.fader-content');
                     newContentDiv.classList.add('slide-down');
-                    
-                    setTimeout(() => {
+
+                    requestAnimationFrame(() => {
                         newContentDiv.classList.remove('slide-down');
+                    });
+
+                    setTimeout(() => {
                         isAnimating = false;
-                    }, 50);
-                }, 250); // Half of the transition duration
+                    }, FADER_ANIMATION_DURATION);
+                }, FADER_ANIMATION_DURATION / 2);
             } else {
-                // Going back to main view - slide down
+                // Going back to main view - slide current content down
                 contentDiv.classList.add('slide-down');
-                
+
                 setTimeout(() => {
                     state.isEffectsView = false;
                     renderApp();
-                    
-                    // Start from above and slide to normal position
+
+                    // Start next view from above then slide to normal position
                     const newContentDiv = document.querySelector('.fader-content');
                     newContentDiv.classList.add('slide-up');
-                    
-                    setTimeout(() => {
+
+                    requestAnimationFrame(() => {
                         newContentDiv.classList.remove('slide-up');
+                    });
+
+                    setTimeout(() => {
                         isAnimating = false;
-                    }, 50);
-                }, 250); // Half of the transition duration
+                    }, FADER_ANIMATION_DURATION);
+                }, FADER_ANIMATION_DURATION / 2);
 }
 
         function animateFaderTransition(fromValue, toValue) {
