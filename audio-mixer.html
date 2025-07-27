@@ -468,7 +468,7 @@ function toggleEffectsView() {
             e.preventDefault();
             const selectedTrack = getSelectedTrack();
             if (!selectedTrack) return;
-            const delta = -e.deltaY / 100; // positive when scrolling up
+            const delta = e.deltaY / 100; // positive when scrolling down
             // Increase sensitivity so small scrolls move the fader more
             const newVolume = Math.max(
                 -60,
