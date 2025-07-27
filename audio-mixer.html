@@ -356,8 +356,6 @@ function toggleEffectsView() {
                 bottomSeg.style.flexGrow = 1 - endPos;
             });
         }
-        }
-
         function toggleTrackMute(trackId) {
             state.tracks = state.tracks.map(track =>
                 track.id === trackId
@@ -471,7 +469,11 @@ function toggleEffectsView() {
             const selectedTrack = getSelectedTrack();
             if (!selectedTrack) return;
             const delta = -e.deltaY / 100; // positive when scrolling up
-            const newVolume = Math.max(-60, Math.min(6, selectedTrack.volume + delta * 2));
+            // Increase sensitivity so small scrolls move the fader more
+            const newVolume = Math.max(
+                -60,
+                Math.min(6, selectedTrack.volume + delta * 4)
+            );
             state.tracks = state.tracks.map(track =>
                 track.id === selectedTrack.id
                     ? { ...track, volume: Number(newVolume.toFixed(1)) }
